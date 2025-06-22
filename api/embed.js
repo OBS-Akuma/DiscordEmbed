@@ -2,7 +2,8 @@ export default async function handler(req, res) {
   const { Title, BigImage, SmallImage, color, hidelink } = req.query;
 
   const title = Title || "Untitled Embed";
-  const bigImage = hidelink === "true" ? "https://grabify.link/images/pixel.png" : BigImage || "";
+  const embedImage = hidelink === "true" ? "https://via.placeholder.com/1x1.png" : BigImage || "";
+  const displayImage = hidelink === "true" ? "https://grabify.link/images/pixel.png" : null;
   const colorMeta = color ? `<meta name="theme-color" content="${color}">` : "";
 
   res.setHeader("Content-Type", "text/html");
@@ -12,14 +13,20 @@ export default async function handler(req, res) {
     <head>
       <title>${title}</title>
       <meta property="og:title" content="${title}">
-      ${bigImage ? `<meta property="og:image" content="${bigImage}">` : ""}
+      ${embedImage ? `<meta property="og:image" content="${embedImage}">` : ""}
       ${SmallImage ? `<meta property="og:thumbnail" content="${SmallImage}">` : ""}
       ${colorMeta}
       <meta property="og:type" content="website">
     </head>
     <body>
-      <h1>Embed generated for Discord</h1>
-      <p>${title}</p>
+      <h1>${title}</h1>
+      ${
+        displayImage
+          ? `<img src="${displayImage}" width="1" height="1" alt="hidden link">`
+          : BigImage
+          ? `<img src="${BigImage}" style="max-width:100%;">`
+          : ""
+      }
     </body>
     </html>
   `);
