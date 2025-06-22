@@ -1,4 +1,4 @@
-// pages/Build.js
+import Head from 'next/head';
 
 const HIDDEN_IMAGE = "https://grabify.link/images/pixel.png";
 
@@ -7,24 +7,24 @@ export default function BuildPage({ title, bigImage, smallImage, color, hidelink
 
   return (
     <>
-      <head>
+      <Head>
         <title>{title}</title>
 
         {/* Discord Embed Meta Tags */}
         <meta property="og:title" content={title} />
         {imageForEmbed && <meta property="og:image" content={imageForEmbed} />}
         {smallImage && <meta property="og:thumbnail" content={smallImage} />}
-        {color && <meta name="theme-color" content={color} />}
+        <meta name="theme-color" content={color || '#5865F2'} />
         <meta property="og:type" content="website" />
-      </head>
+      </Head>
 
-      <body>
+      <main style={{ padding: "2rem", fontFamily: "sans-serif" }}>
         <h1>{title}</h1>
         {bigImage && !hidelink && (
           <img src={bigImage} alt="Big Image" style={{ maxWidth: "100%" }} />
         )}
         {smallImage && (
-          <img src={smallImage} alt="Small Image" style={{ width: 100 }} />
+          <img src={smallImage} alt="Small Image" style={{ width: 100, marginTop: 10 }} />
         )}
         {hidelink && (
           <img
@@ -35,7 +35,7 @@ export default function BuildPage({ title, bigImage, smallImage, color, hidelink
             alt="Hidden Pixel"
           />
         )}
-      </body>
+      </main>
     </>
   );
 }
