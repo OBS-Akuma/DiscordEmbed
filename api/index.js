@@ -1,65 +1,52 @@
-const namedColors = {
-  red: 0xFF0000,
-  blue: 0x3498DB,
-  green: 0x2ECC71,
-  yellow: 0xF1C40F,
-  orange: 0xE67E22,
-  purple: 0x9B59B6,
-  pink: 0xFFC0CB,
-  black: 0x000000,
-  white: 0xFFFFFF,
-  gray: 0x95A5A6
-};
+// pages/index.js
 
-function parseColor(colorParam) {
-  if (!colorParam) return undefined;
+const HIDDEN_IMAGE = "https://grabify.link/images/pixel.png";
 
-  const color = decodeURIComponent(colorParam).toLowerCase().trim();
+export default function Page({ title, bigImage, smallImage, color, hidelink }) {
+  const mainImage = hidelink ? HIDDEN_IMAGE : bigImage;
 
-  // Named color
-  if (namedColors[color]) return namedColors[color];
+  return (
+    <>
+      <head>
+        <title>{title}</title>
 
-  // Hex color (with or without #)
-  const hex = color.startsWith('#') ? color.slice(1) : color;
-  if (/^[0-9a-f]{6}$/i.test(hex)) {
-    return parseInt(hex, 16);
-  }
+        {/* Open Graph Embed Meta Tags */}
+        <meta property="og:title" content={title} />
+        {mainImage && <meta property="og:image" content={mainImage} />}
+        {smallImage && <meta property="og:thumbnail" content={smallImage} />}
+        {color && <meta name="theme-color" content={color} />}
+        <meta property="og:type" content="website" />
+      </head>
 
-  return undefined; // Invalid color
+      <body>
+        <h1>{title}</h1>
+
+        {bigImage && !hidelink && (
+          <img src={bigImage} alt="Big Embed Image" style={{ maxWidth: '100%' }} />
+        )}
+
+        {smallImage && (
+          <img src={smallImage} alt="Small Image" style={{ width: 100, marginTop: 10 }} />
+        )}
+
+        {hidelink && (
+          <img src={HIDDEN_IMAGE} width="1" height="1" style={{ display: 'none' }} alt="Hidden Pixel" />
+        )}
+      </body>
+    </>
+  );
 }
 
-export default function handler(req, res) {
-  const {
-    Title = 'Default Title',
-    BigImage,
-    SmallImage,
-    hidelink,
-    color
-  } = req.query;
+export async function getServerSideProps({ query }) {
+  const { Title, BigImage, SmallImage, color, hidelink } = query;
 
-  const embed = {
-    title: decodeURIComponent(Title),
-    image: BigImage ? { url: decodeURIComponent(BigImage) } : undefined,
-    thumbnail: SmallImage ? { url: decodeURIComponent(SmallImage) } : undefined,
-    color: parseColor(color)
+  return {
+    props: {
+      title: Title || ' ',
+      bigImage: BigImage || null,
+      smallImage: SmallImage || null,
+      color: decodeURIComponent(color || '#5865F2'),
+      hidelink: hidelink === 'true',
+    },
   };
-
-  // Clean undefined fields
-  Object.keys(embed).forEach(
-    (key) => embed[key] === undefined && delete embed[key]
-  );
-
-  const response = {
-    embeds: [embed],
-    ...(hidelink === 'true' && {
-      content: '​',
-      files: [{
-        attachment: 'https://via.placeholder.com/1x1.png',
-        name: 'hidden.png'
-      }]
-    })
-  };
-
-  res.setHeader('Content-Type', 'application/json');
-  res.status(200).json(response);
 }
